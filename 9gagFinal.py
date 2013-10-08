@@ -1,8 +1,8 @@
 # Author : sjs7007@gmail.com
 # New script after site changed : Working as of 8th July 2013
 
-import os
-import urllib2
+import os,re
+import urllib2,xmllib
 
 number=1
 nextLink="http://9gag.com/"
@@ -40,13 +40,16 @@ def FindTitle(temp): #Find title of image to be downloaded
 	end_title_of_image=temp.find('</title', start_title_of_image)
 	title_of_image=temp[start_title_of_image:end_title_of_image]
 	#print title_of_image
+	X=xmllib.XMLParser()
+	title_of_image=X.translate_references(title_of_image)
+	title_of_image=re.escape(title_of_image)
 	return title_of_image
 
 def Rename(actual_link,toName): #Give the downloaded file a more meaningful name
 	fromName=actual_link[actual_link.find("photo/")+6:]
 	toName=toName+".jpg"
 	#however if there are space in between it will lead to problem hence replace all spaces in toName to '_'
-	toName=toName.replace(' ','_')
+	#toName=toName.replace(' ','_')
 	os.system("mv %s %s" %(fromName,toName))
 
 def ExtractImage(inputUrl): #Will extract image from a page like http://9gag.com/gag/6482858
@@ -59,15 +62,15 @@ def ExtractImage(inputUrl): #Will extract image from a page like http://9gag.com
 	end_actual_link=temp.find('.jpg',start_actual_link)+4
 	actual_link=temp[start_actual_link:end_actual_link]
 	#print actual_link
-
 	title_of_image=FindTitle(Page_contents)
-	print title_of_image
+	#print title_of_image
 	os.system("echo %s|cat>>log" %title_of_image)
-	print
-	print
+	#print
+	#print
 	os.system("echo|cat>>log")
 	os.system("echo|cat>>log")
 	os.system("wget %s >/dev/null 2>&1" %actual_link)
+	print "Actual link : " + actual_link + "\nTitle : " + title_of_image + "\n\n"
 	Rename(actual_link,title_of_image)
 
 def FindLinks3(base_link): #find page source of next hot page and return it 
@@ -108,6 +111,3 @@ os.system("echo End|cat>>log")
 os.system("echo Total Images downloaded : %d | cat>>log" %number)
 os.system("echo ------------------------------------------|cat>>log")
 os.system("echo|cat")
-
-
-
